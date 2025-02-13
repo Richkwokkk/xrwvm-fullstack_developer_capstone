@@ -13,7 +13,6 @@ const dealerships_data = JSON.parse(fs.readFileSync("dealerships.json", 'utf8'))
 
 mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
 
-
 const Reviews = require('./review');
 
 const Dealerships = require('./dealership');
@@ -29,7 +28,6 @@ try {
 } catch (error) {
   res.status(500).json({ error: 'Error fetching documents' });
 }
-
 
 // Express route to home
 app.get('/', async (req, res) => {
@@ -84,28 +82,17 @@ app.get('/fetchDealers/:state', async (req, res) => {
 // Express route to fetch dealer by a particular id
 app.get('/fetchDealer/:id', async (req, res) => {
     const dealerId = req.params.id;
-
-    let queryId;
-    if (mongoose.Types.ObjectId.isValid(dealerId)) {
-      queryId = mongoose.Types.ObjectId(dealerId);
-    } else if (!isNaN(dealerId)) {
-      queryId = parseInt(dealerId);
-    } else {
-      return res.status(400).json({ error: 'Invalid dealer ID format' });
-    }
-  
+    
     try {
-      const dealer = await Dealerships.findOne({ _id: queryId });
-      
+      const dealer = await Dealerships.find({id: dealerId});
       if (!dealer) {
         return res.status(404).json({ error: `Dealership with ID ${dealerId} not found` });
       }
-      
       res.json(dealer);
     } catch (error) {
       res.status(500).json({ error: 'Error fetching dealership by ID' });
     }
-});
+  });
 
 //Express route to insert review
 app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
